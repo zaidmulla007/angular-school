@@ -1,0 +1,127 @@
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-wrapper">
+      <i class="fas fa-graduation-cap logo-icon"></i>
+      <h2 class="logo-text">EduManage</h2>
+    </div>
+    <button class="toggle-btn" (click)="toggleSidebar()">
+      <i class="fas fa-bars"></i>
+    </button>
+  </div>
+
+  <div class="user-profile">
+    <div class="profile-img-wrapper">
+      <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Admin" class="profile-img">
+      <span class="status-dot"></span>
+    </div>
+    <div class="profile-info" [class.hidden]="isCollapsed">
+      <h4 class="profile-name">John Anderson</h4>
+      <p class="profile-role">Administrator</p>
+    </div>
+  </div>
+
+  <ul class="nav-menu">
+    <li class="nav-item" [class.active]="activeRoute === 'dashboard'">
+      <a href="#" class="nav-link" (click)="setActive('dashboard')">
+        <i class="fas fa-tachometer-alt nav-icon"></i>
+        <span class="nav-text" [class.hidden]="isCollapsed">Dashboard</span>
+        <span class="nav-badge" *ngIf="!isCollapsed">New</span>
+      </a>
+    </li>
+
+    <li class="nav-item" [class.active]="activeRoute === 'students'">
+      <a href="#" class="nav-link" (click)="setActive('students')">
+        <i class="fas fa-user-graduate nav-icon"></i>
+        <span class="nav-text" [class.hidden]="isCollapsed">Students</span>
+        <span class="nav-counter" *ngIf="!isCollapsed">1,234</span>
+      </a>
+    </li>
+
+    <li class="nav-item" [class.active]="activeRoute === 'teachers'">
+      <a href="#" class="nav-link" (click)="setActive('teachers')">
+        <i class="fas fa-chalkboard-teacher nav-icon"></i>
+        <span class="nav-text" [class.hidden]="isCollapsed">Teachers</span>
+        <span class="nav-counter" *ngIf="!isCollapsed">89</span>
+      </a>
+    </li>
+
+    <li class="nav-item" [class.active]="activeRoute === 'classes'">
+      <a href="#" class="nav-link" (click)="setActive('classes')">
+        <i class="fas fa-school nav-icon"></i>
+        <span class="nav-text" [class.hidden]="isCollapsed">Classes</span>
+      </a>
+    </li>
+
+    <li class="nav-item" [class.active]="activeRoute === 'attendance'">
+      <a href="#" class="nav-link" (click)="setActive('attendance')">
+        <i class="fas fa-calendar-check nav-icon"></i>
+        <span class="nav-text" [class.hidden]="isCollapsed">Attendance</span>
+      </a>
+    </li>
+
+    <li class="nav-item" [class.active]="activeRoute === 'grades'">
+      <a href="#" class="nav-link" (click)="setActive('grades')">
+        <i class="fas fa-chart-line nav-icon"></i>
+        <span class="nav-text" [class.hidden]="isCollapsed">Grades</span>
+      </a>
+    </li>
+
+    <li class="nav-item" [class.active]="activeRoute === 'timetable'">
+      <a href="#" class="nav-link" (click)="setActive('timetable')">
+        <i class="fas fa-clock nav-icon"></i>
+        <span class="nav-text" [class.hidden]="isCollapsed">Timetable</span>
+      </a>
+    </li>
+
+    <li class="nav-item" [class.active]="activeRoute === 'fees'">
+      <a href="#" class="nav-link" (click)="setActive('fees')">
+        <i class="fas fa-dollar-sign nav-icon"></i>
+        <span class="nav-text" [class.hidden]="isCollapsed">Fees</span>
+        <span class="nav-alert" *ngIf="!isCollapsed">!</span>
+      </a>
+    </li>
+
+    <li class="nav-item" [class.active]="activeRoute === 'library'">
+      <a href="#" class="nav-link" (click)="setActive('library')">
+        <i class="fas fa-book nav-icon"></i>
+        <span class="nav-text" [class.hidden]="isCollapsed">Library</span>
+      </a>
+    </li>
+
+    <li class="nav-separator"></li>
+
+    <li class="nav-item" [class.active]="activeRoute === 'reports'">
+      <a href="#" class="nav-link" (click)="setActive('reports')">
+        <i class="fas fa-file-alt nav-icon"></i>
+        <span class="nav-text" [class.hidden]="isCollapsed">Reports</span>
+      </a>
+    </li>
+
+    <li class="nav-item" [class.active]="activeRoute === 'settings'">
+      <a href="#" class="nav-link" (click)="setActive('settings')">
+        <i class="fas fa-cog nav-icon"></i>
+        <span class="nav-text" [class.hidden]="isCollapsed">Settings</span>
+      </a>
+    </li>
+  </ul>
+
+  <div class="sidebar-footer">
+    <button class="logout-btn">
+      <i class="fas fa-sign-out-alt"></i>
+      <span [class.hidden]="isCollapsed">Logout</span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-nav">
+  <button class="mobile-toggle" (click)="toggleMobileMenu()">
+    <i class="fas fa-bars"></i>
+  </button>
+  <h3 class="mobile-title">EduManage</h3>
+  <div class="mobile-actions">
+    <button class="mobile-action">
+      <i class="fas fa-bell"></i>
+      <span class="notification-dot"></span>
+    </button>
+  </div>
+</div>

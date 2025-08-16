@@ -1,0 +1,16 @@
+<div class="notification-container">
+  <div
+    *ngFor="let notification of notifications"
+    class="notification notification-{{ notification.type }}"
+    [@slideIn]
+    (@slideIn.done)="$event.toState === 'void' && removeNotification(notification.id)"
+  >
+    <div class="notification-icon">{{ getIcon(notification.type) }}</div>
+    <div class="notification-content">
+      <p class="notification-message">{{ notification.message }}</p>
+    </div>
+    <button class="notification-close" (click)="removeNotification(notification.id)">
+      ×
+    </button>
+  </div>
+</div>

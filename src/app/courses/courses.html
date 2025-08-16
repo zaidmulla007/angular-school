@@ -1,0 +1,368 @@
+<div class="courses-container">
+  <div class="courses-header">
+    <h1 class="page-title">Course Management</h1>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="openAddModal()">
+        <span class="btn-icon">+</span>
+        Create Course
+      </button>
+      <button class="btn btn-secondary" (click)="exportCourses()">
+        <span class="btn-icon">⬇</span>
+        Export
+      </button>
+    </div>
+  </div>
+
+  <div class="filters-section">
+    <div class="search-box">
+      <input
+        type="text"
+        placeholder="Search courses, code, or instructor..."
+        [(ngModel)]="searchTerm"
+        class="search-input"
+      />
+      <span class="search-icon">🔍</span>
+    </div>
+    <div class="filter-group">
+      <select [(ngModel)]="filterDepartment" class="filter-select">
+        <option value="">All Departments</option>
+        <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+      </select>
+      <select [(ngModel)]="filterLevel" class="filter-select">
+        <option value="">All Levels</option>
+        <option *ngFor="let level of levels" [value]="level">{{ level }}</option>
+      </select>
+      <select [(ngModel)]="filterStatus" class="filter-select">
+        <option value="">All Status</option>
+        <option *ngFor="let status of statuses" [value]="status">{{ status | titlecase }}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="stats-cards">
+    <div class="stat-card gradient-1">
+      <div class="stat-icon">📚</div>
+      <div class="stat-content">
+        <h3>{{ courses().length }}</h3>
+        <p>Total Courses</p>
+      </div>
+    </div>
+    <div class="stat-card gradient-2">
+      <div class="stat-icon">▶️</div>
+      <div class="stat-content">
+        <h3>{{ activeCourses }}</h3>
+        <p>Active Courses</p>
+      </div>
+    </div>
+    <div class="stat-card gradient-3">
+      <div class="stat-icon">👥</div>
+      <div class="stat-content">
+        <h3>{{ totalEnrollments }}</h3>
+        <p>Total Enrollments</p>
+      </div>
+    </div>
+    <div class="stat-card gradient-4">
+      <div class="stat-icon">📊</div>
+      <div class="stat-content">
+        <h3>{{ averageCapacity }}%</h3>
+        <p>Avg. Capacity</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="courses-grid">
+    <div *ngFor="let course of filteredCourses" class="course-card" [@bounceIn]>
+      <div class="course-thumbnail" [style.backgroundImage]="'url(' + course.thumbnail + ')'">
+        <div class="course-badges">
+          <span class="badge" [ngClass]="getLevelClass(course.level)">{{ course.level }}</span>
+          <span class="badge" [ngClass]="getStatusClass(course.status)">{{ course.status }}</span>
+        </div>
+      </div>
+      <div class="course-content">
+        <div class="course-header">
+          <h3 class="course-code">{{ course.code }}</h3>
+          <div class="course-credits">{{ course.credits }} Credits</div>
+        </div>
+        <h4 class="course-name">{{ course.name }}</h4>
+        <p class="course-description">{{ course.description }}</p>
+        
+        <div class="course-meta">
+          <div class="meta-item">
+            <span class="meta-icon">👨‍🏫</span>
+            <span class="meta-text">{{ course.instructor }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-icon">🏢</span>
+            <span class="meta-text">{{ course.department }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-icon">📅</span>
+            <span class="meta-text">{{ course.schedule }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-icon">⏱️</span>
+            <span class="meta-text">{{ course.duration }}</span>
+          </div>
+        </div>
+
+        <div class="enrollment-section">
+          <div class="enrollment-info">
+            <span class="enrollment-text">{{ course.enrolledStudents }} / {{ course.maxStudents }} enrolled</span>
+            <span class="enrollment-percentage">{{ getCapacityPercentage(course) }}%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="getCapacityPercentage(course)"></div>
+          </div>
+        </div>
+
+        <div class="course-actions">
+          <button class="action-btn view" (click)="openViewModal(course)" title="View Details">
+            👁️
+          </button>
+          <button class="action-btn edit" (click)="openEditModal(course)" title="Edit">
+            ✏️
+          </button>
+          <button class="action-btn delete" (click)="deleteCourse(course.id)" title="Delete">
+            🗑️
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()" [@slideUp]>
+      <div class="modal-header">
+        <h2>
+          {{ modalMode === 'add' ? 'Create New Course' : modalMode === 'edit' ? 'Edit Course' : 'Course Details' }}
+        </h2>
+        <button class="modal-close" (click)="closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <form *ngIf="modalMode !== 'view'">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Course Code *</label>
+              <input
+                type="text"
+                [(ngModel)]="currentCourse.code"
+                name="code"
+                placeholder="e.g., CS101"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label>Credits *</label>
+              <input
+                type="number"
+                [(ngModel)]="currentCourse.credits"
+                name="credits"
+                min="1"
+                max="6"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Course Name *</label>
+            <input
+              type="text"
+              [(ngModel)]="currentCourse.name"
+              name="name"
+              placeholder="Enter course name"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <textarea
+              [(ngModel)]="currentCourse.description"
+              name="description"
+              rows="3"
+              placeholder="Enter course description"
+            ></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Instructor *</label>
+              <input
+                type="text"
+                [(ngModel)]="currentCourse.instructor"
+                name="instructor"
+                placeholder="Enter instructor name"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label>Department</label>
+              <select [(ngModel)]="currentCourse.department" name="department">
+                <option value="">Select Department</option>
+                <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Level</label>
+              <select [(ngModel)]="currentCourse.level" name="level">
+                <option *ngFor="let level of levels" [value]="level">{{ level }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Duration</label>
+              <input
+                type="text"
+                [(ngModel)]="currentCourse.duration"
+                name="duration"
+                placeholder="e.g., 16 weeks"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Start Date</label>
+              <input
+                type="date"
+                [(ngModel)]="currentCourse.startDate"
+                name="startDate"
+              />
+            </div>
+            <div class="form-group">
+              <label>End Date</label>
+              <input
+                type="date"
+                [(ngModel)]="currentCourse.endDate"
+                name="endDate"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Schedule</label>
+            <input
+              type="text"
+              [(ngModel)]="currentCourse.schedule"
+              name="schedule"
+              placeholder="e.g., Mon, Wed, Fri - 10:00 AM"
+            />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Max Students</label>
+              <input
+                type="number"
+                [(ngModel)]="currentCourse.maxStudents"
+                name="maxStudents"
+                min="1"
+              />
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select [(ngModel)]="currentCourse.status" name="status">
+                <option *ngFor="let status of statuses" [value]="status">{{ status | titlecase }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Thumbnail URL (optional)</label>
+            <input
+              type="url"
+              [(ngModel)]="currentCourse.thumbnail"
+              name="thumbnail"
+              placeholder="Enter image URL"
+            />
+          </div>
+        </form>
+
+        <div *ngIf="modalMode === 'view'" class="course-details">
+          <div class="detail-section">
+            <h3>Course Information</h3>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <label>Code:</label>
+                <span>{{ currentCourse.code }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Name:</label>
+                <span>{{ currentCourse.name }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Credits:</label>
+                <span>{{ currentCourse.credits }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Level:</label>
+                <span class="badge" [ngClass]="getLevelClass(currentCourse.level)">{{ currentCourse.level }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h3>Description</h3>
+            <p>{{ currentCourse.description }}</p>
+          </div>
+
+          <div class="detail-section">
+            <h3>Course Details</h3>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <label>Instructor:</label>
+                <span>{{ currentCourse.instructor }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Department:</label>
+                <span>{{ currentCourse.department }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Schedule:</label>
+                <span>{{ currentCourse.schedule }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Duration:</label>
+                <span>{{ currentCourse.duration }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Start Date:</label>
+                <span>{{ currentCourse.startDate | date:'mediumDate' }}</span>
+              </div>
+              <div class="detail-item">
+                <label>End Date:</label>
+                <span>{{ currentCourse.endDate | date:'mediumDate' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h3>Enrollment</h3>
+            <div class="enrollment-visual">
+              <div class="enrollment-stats">
+                <span class="enrolled">{{ currentCourse.enrolledStudents }} enrolled</span>
+                <span class="capacity">{{ currentCourse.maxStudents }} capacity</span>
+              </div>
+              <div class="progress-bar large">
+                <div class="progress-fill" [style.width.%]="getCapacityPercentage(currentCourse)"></div>
+              </div>
+              <div class="enrollment-percentage">{{ getCapacityPercentage(currentCourse) }}% Full</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeModal()">
+          {{ modalMode === 'view' ? 'Close' : 'Cancel' }}
+        </button>
+        <button *ngIf="modalMode !== 'view'" class="btn btn-primary" (click)="saveCourse()">
+          {{ modalMode === 'add' ? 'Create Course' : 'Update Course' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

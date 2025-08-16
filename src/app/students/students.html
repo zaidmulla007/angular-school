@@ -1,0 +1,309 @@
+<div class="students-container">
+  <header class="page-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="page-title">
+          <i class="fas fa-user-graduate"></i>
+          Students Management
+        </h1>
+        <div class="breadcrumb">
+          <a href="#" class="breadcrumb-item">Dashboard</a>
+          <i class="fas fa-chevron-right"></i>
+          <span class="breadcrumb-item active">Students</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary" (click)="showAddStudent = true">
+          <i class="fas fa-plus"></i>
+          Add New Student
+        </button>
+        <button class="btn btn-secondary">
+          <i class="fas fa-download"></i>
+          Export
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="filters-section">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input 
+        type="text" 
+        placeholder="Search by name, ID, or class..." 
+        [(ngModel)]="searchQuery"
+        class="search-input">
+    </div>
+    
+    <div class="filter-chips">
+      <div class="filter-chip" *ngFor="let filter of activeFilters">
+        {{ filter.label }}
+        <button class="chip-close" (click)="removeFilter(filter)">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+    
+    <div class="filter-controls">
+      <select class="filter-select" [(ngModel)]="selectedClass">
+        <option value="">All Classes</option>
+        <option *ngFor="let class of classes" [value]="class">{{ class }}</option>
+      </select>
+      
+      <select class="filter-select" [(ngModel)]="selectedStatus">
+        <option value="">All Status</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+        <option value="suspended">Suspended</option>
+      </select>
+      
+      <button class="btn btn-filter" (click)="showAdvancedFilters = !showAdvancedFilters">
+        <i class="fas fa-filter"></i>
+        Advanced Filters
+      </button>
+    </div>
+  </div>
+
+  <div class="students-grid" *ngIf="viewMode === 'grid'">
+    <div class="student-card" *ngFor="let student of students; let i = index" 
+         [style.animation-delay]="i * 0.05 + 's'">
+      <div class="card-header">
+        <div class="student-avatar">
+          <img [src]="student.avatar" [alt]="student.name">
+          <span class="status-badge" [class]="'status-' + student.status"></span>
+        </div>
+        <div class="card-menu">
+          <button class="menu-btn" (click)="toggleMenu(student.id)">
+            <i class="fas fa-ellipsis-v"></i>
+          </button>
+          <div class="dropdown-menu" *ngIf="openMenuId === student.id">
+            <a href="#" class="menu-item">
+              <i class="fas fa-eye"></i> View Profile
+            </a>
+            <a href="#" class="menu-item">
+              <i class="fas fa-edit"></i> Edit
+            </a>
+            <a href="#" class="menu-item">
+              <i class="fas fa-envelope"></i> Send Message
+            </a>
+            <a href="#" class="menu-item danger">
+              <i class="fas fa-trash"></i> Delete
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card-body">
+        <h3 class="student-name">{{ student.name }}</h3>
+        <p class="student-id">ID: {{ student.studentId }}</p>
+        
+        <div class="student-info">
+          <div class="info-item">
+            <i class="fas fa-school"></i>
+            <span>{{ student.class }}</span>
+          </div>
+          <div class="info-item">
+            <i class="fas fa-calendar"></i>
+            <span>{{ student.age }} years</span>
+          </div>
+          <div class="info-item">
+            <i class="fas fa-phone"></i>
+            <span>{{ student.phone }}</span>
+          </div>
+        </div>
+        
+        <div class="student-stats">
+          <div class="stat-item">
+            <span class="stat-label">Attendance</span>
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="student.attendance"></div>
+            </div>
+            <span class="stat-value">{{ student.attendance }}%</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Performance</span>
+            <div class="performance-stars">
+              <i class="fas fa-star" *ngFor="let star of [1,2,3,4,5]" 
+                 [class.filled]="star <= student.performance"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card-footer">
+        <button class="btn btn-sm btn-outline">
+          <i class="fas fa-user"></i>
+          View Details
+        </button>
+        <button class="btn btn-sm btn-primary">
+          <i class="fas fa-comment"></i>
+          Contact
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="students-table" *ngIf="viewMode === 'list'">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th class="sortable" (click)="sort('id')">
+            ID
+            <i class="fas fa-sort"></i>
+          </th>
+          <th class="sortable" (click)="sort('name')">
+            Student Name
+            <i class="fas fa-sort"></i>
+          </th>
+          <th>Class</th>
+          <th>Age</th>
+          <th>Parent Contact</th>
+          <th>Attendance</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let student of students" class="table-row">
+          <td>{{ student.studentId }}</td>
+          <td>
+            <div class="student-cell">
+              <img [src]="student.avatar" [alt]="student.name" class="table-avatar">
+              <span>{{ student.name }}</span>
+            </div>
+          </td>
+          <td>{{ student.class }}</td>
+          <td>{{ student.age }}</td>
+          <td>{{ student.phone }}</td>
+          <td>
+            <div class="attendance-cell">
+              <div class="mini-progress">
+                <div class="mini-progress-fill" [style.width.%]="student.attendance"></div>
+              </div>
+              <span>{{ student.attendance }}%</span>
+            </div>
+          </td>
+          <td>
+            <span class="status-pill" [class]="'status-' + student.status">
+              {{ student.status }}
+            </span>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn-icon" title="View">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button class="btn-icon" title="Edit">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn-icon danger" title="Delete">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="view-toggle">
+    <button class="toggle-btn" [class.active]="viewMode === 'grid'" (click)="viewMode = 'grid'">
+      <i class="fas fa-th"></i>
+    </button>
+    <button class="toggle-btn" [class.active]="viewMode === 'list'" (click)="viewMode = 'list'">
+      <i class="fas fa-list"></i>
+    </button>
+  </div>
+
+  <!-- Add Student Modal -->
+  <div class="modal-overlay" *ngIf="showAddStudent" (click)="showAddStudent = false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">Add New Student</h2>
+        <button class="modal-close" (click)="showAddStudent = false">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <form class="student-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>First Name</label>
+              <input type="text" class="form-control" placeholder="Enter first name">
+            </div>
+            
+            <div class="form-group">
+              <label>Last Name</label>
+              <input type="text" class="form-control" placeholder="Enter last name">
+            </div>
+            
+            <div class="form-group">
+              <label>Date of Birth</label>
+              <input type="date" class="form-control">
+            </div>
+            
+            <div class="form-group">
+              <label>Class</label>
+              <select class="form-control">
+                <option>Select Class</option>
+                <option *ngFor="let class of classes">{{ class }}</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label>Parent Name</label>
+              <input type="text" class="form-control" placeholder="Enter parent name">
+            </div>
+            
+            <div class="form-group">
+              <label>Contact Number</label>
+              <input type="tel" class="form-control" placeholder="Enter phone number">
+            </div>
+            
+            <div class="form-group full-width">
+              <label>Address</label>
+              <textarea class="form-control" rows="3" placeholder="Enter address"></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" class="form-control" placeholder="Enter email">
+            </div>
+            
+            <div class="form-group">
+              <label>Blood Group</label>
+              <select class="form-control">
+                <option>Select Blood Group</option>
+                <option>A+</option>
+                <option>A-</option>
+                <option>B+</option>
+                <option>B-</option>
+                <option>O+</option>
+                <option>O-</option>
+                <option>AB+</option>
+                <option>AB-</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="photo-upload">
+            <div class="upload-area">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <p>Drop photo here or click to upload</p>
+              <input type="file" accept="image/*" hidden>
+            </div>
+          </div>
+        </form>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="showAddStudent = false">Cancel</button>
+        <button class="btn btn-primary">
+          <i class="fas fa-save"></i>
+          Save Student
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
